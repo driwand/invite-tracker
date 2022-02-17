@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== 'production') filesExtension = '.ts';
 class BotClient extends Client {
 	public commands: Collection<string, Command> = new Collection();
 	public events: Collection<string, Event> = new Collection();
+	public serverInvites: Collection<string, Map<string, number | null>> = new Collection();
 
 	constructor(options: ClientOptions) {
 		super(options);
@@ -53,10 +54,13 @@ class BotClient extends Client {
 export default new BotClient({
 	intents: [
 		'GUILDS',
+		'GUILD_MEMBERS',
 		'DIRECT_MESSAGES',
 		'GUILD_MESSAGES',
 		'GUILD_MESSAGE_REACTIONS',
 		'DIRECT_MESSAGES',
-		'DIRECT_MESSAGE_REACTIONS',
-	],
+		'DIRECT_MESSAGE_REACTIONS'
+	]
 });
+
+export type BClient = BotClient;
