@@ -46,7 +46,7 @@ const sendEmbed = (member: GuildMember, inviter: User | null, invite: Invite | n
 	const currentTime = moment().utc().format('ddd MMMM Do, YYYY hh:mm A');
 
 	embed.setAuthor({ name: `${member.guild.name}`, iconURL: member.guild.iconURL() ?? '' });
-	embed.setDescription(`**New Member: ${member.guild.members.cache.size}**`);
+	embed.setDescription(`**New Member: ${member.guild?.memberCount ?? 0}**`);
 
 	if (!inviter || !invite) {
 		const unknownInviteDescription = `Somehow!! ${member.user.tag} (<@${member.user.id}> joined the server.)`;
