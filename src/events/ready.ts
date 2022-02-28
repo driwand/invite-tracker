@@ -5,8 +5,8 @@ import { setTimeout as sleep } from 'timers/promises';
 export const event: Event = {
 	name: 'ready',
 	execute: async (client) => {
-		console.log(`I am ready! ${client.user?.tag}`);
 		await sleep(5000);
+		console.log(`I am ready! ${client.user?.tag}`);
 		loadInvites(client);
 	}
 };

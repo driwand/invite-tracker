@@ -16,7 +16,7 @@
 		"prettier": "^2.5.1",
 		"ts-node": "^10.4.0"
 	},
-	"name": "bot",
+	"name": "inviteTracker",
 	"version": "1.0.0",
 	"main": "bot.js",
 	"scripts": {
@@ -27,8 +27,8 @@
 		"serve": "cross-env NODE_ENV=production node build/bot.js",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"pm2": "npm run build && pm2 start npm --name bot -- start",
-		"pm2:restart": "npm run build && pm2 restart bot"
+		"pm2": "npm run build && pm2 start npm --name inviteTracker -- start",
+		"pm2:restart": "npm run build && pm2 restart inviteTracker"
 	},
 	"keywords": [],
 	"author": "",
