@@ -6,7 +6,7 @@ export const event: Event = {
 	name: 'ready',
 	execute: async (client) => {
 		console.log(`I am ready! ${client.user?.tag}`);
-		await sleep(100);
+		await sleep(5000);
 		loadInvites(client);
 	}
 };
