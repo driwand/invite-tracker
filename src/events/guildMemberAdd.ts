@@ -1,6 +1,8 @@
-import { Collection, GuildMember, Invite, TextChannel } from 'discord.js';
+import { Collection, GuildMember, Invite, TextChannel, User } from 'discord.js';
 import { BClient } from '../client/client';
 import { Event } from '../interfaces/event';
+import EmbedMessage from '../classes/EmbedMessage';
+import moment from 'moment';
 
 export const event: Event = {
 	name: 'guildMemberAdd',
@@ -16,28 +18,63 @@ export const event: Event = {
 const checkInviter = async (client: BClient, member: GuildMember) => {
 	try {
 		const newInvites = await member.guild.invites.fetch();
-		const inviteChannel = member.guild.channels.cache.find(
-			(channel) => channel.name === 'invite-logs'
-		) as TextChannel;
+
 		const oldInvites = client.serverInvites.get(member.guild.id);
 
-		if (!oldInvites) return inviteChannel?.send(`Somehow ${member.user.tag} joined the server.`);
+		if (!oldInvites) return sendEmbed(member, null, null);
 
 		const invite: Invite | null = await findInvite(newInvites, oldInvites);
 
-		if (!invite || !invite.inviter) return inviteChannel?.send(`Somehow ${member.user.tag} joined the server.`);
+		if (!invite || !invite.inviter) return sendEmbed(member, null, null);
 
 		const inviter = client.users.cache.get(invite.inviter.id);
 		if (!inviter) await client.users.fetch(invite.inviter.id);
-		if (!inviter) return;
+		if (!inviter) return sendEmbed(member, null, null);
 
-		const used = invite.uses && invite.uses > 1 ? 'time' : 'times';
-		inviteChannel?.send(
-			`**${member.user.tag}** is invited by **${inviter.tag}** using invite code ${invite.code} (used: ${invite.uses} ${used}).`
-		);
+		sendEmbed(member, inviter, invite);
 	} catch (error) {
 		console.error();
 	}
+};
+
+const sendEmbed = (member: GuildMember, inviter: User | null, invite: Invite | null) => {
+	const inviteChannel = member.guild.channels.cache.find((channel) =>
+		channel.name.includes('invite-logs')
+	) as TextChannel;
+
+	const embed = new EmbedMessage();
+	const currentTime = moment().utc().format('ddd MMMM Do, YYYY hh:mm A');
+
+	embed.setAuthor({ name: `${member.guild.name}`, iconURL: member.guild.iconURL() ?? '' });
+	embed.setDescription(`**New Member: ${member.guild.members.cache.size}**`);
+
+	if (!inviter || !invite) {
+		const unknownInviteDescription = `Somehow!! ${member.user.tag} (<@${member.user.id}> joined the server.)`;
+		embed.addField('Invite', unknownInviteDescription);
+	} else {
+		let accountCreationDate = member?.user.createdAt;
+		const inviteDescription =
+			`**User:** ${member.user.tag} (<@${member.user.id}>)\n` +
+			`**Account Age:** ${`<t:${moment(accountCreationDate).format('X')}:R>`}\n` +
+			`**Invite:** https://discord.gg/${invite.code}\n` +
+			`**Invite Created:** ${`<t:${moment(invite.createdAt).format('X')}:R>`}\n` +
+			`**Invite Uses:** ${invite.uses}`;
+
+		accountCreationDate = inviter.createdAt ?? new Date();
+		const inviterDescription =
+			`**User:** ${inviter.tag} (<@${inviter.id}>)\n` +
+			`**Account Age:** ${`<t:${moment(accountCreationDate).format('X')}:R>`}`;
+
+		embed.addFields(
+			{ name: '<:newmember:947651148574244874> Invite', value: inviteDescription },
+			{ name: '<:member:947651157805920267> Inviter', value: inviterDescription }
+		);
+	}
+
+	const botAvatar = member.client.user?.avatarURL();
+	embed.setFooter({ text: currentTime, iconURL: botAvatar ?? '' });
+
+	inviteChannel?.send({ embeds: [embed] });
 };
 
 const findInvite = (

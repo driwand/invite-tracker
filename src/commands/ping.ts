@@ -7,5 +7,5 @@ export const command: Command = {
 
 	async execute(client, msg) {
 		msg.reply('pong');
-	},
+	}
 };
